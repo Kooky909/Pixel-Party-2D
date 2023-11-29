@@ -6,12 +6,18 @@ var socket = io();
 var connected = false;
 
 // global constants
-//var Colors = ['black','red','orange','yellow','green','blue','purple','brown', 'pink'];
+var Colors = ['black','red','orange','yellow','green','blue','purple','brown', 'pink', 'cyan', 'teal', 'magenta'];
+var ColorImages = [];
 var clientName = "";
 
-var ColorImage = ["client/img/black.png", "client/img/red.png", "client/img/orange.png",
-"client/img/yellow.png", "client/img/green.png", "client/img/blue.png", "client/img/purple.png",
-"client/img/brown.png", "client/img/pink.png", "client/img/cyan.png", "client/img/teal.png", "client/img/magenta.png"];
+for (var i = 0; i < 12; i++) {
+   const temp = new Image(); // Create new img element
+   temp.src = "client/img/" + Colors[i] + ".png"; // Set source path
+   ColorImages[i] = temp;
+}
+
+const toucan = new Image(); // Create new img element
+toucan.src = "client/img/toucan.png"; // Set source path
 
 // doccument elements
 var signDiv = document.getElementById('signDiv');
@@ -108,9 +114,7 @@ socket.on('newPositions', function(data){
             var x = (j * width) - clientX;
             var y = (i * width) - clientY;
             
-            const block = new Image(); // Create new img element
-            block.src = ColorImage[board[i][j]]; // Set source path
-            ctx.drawImage(block, x*2 + 250, y*2 + 250, width*2, width*2);
+            ctx.drawImage(ColorImages[board[i][j]], x*2 + 250, y*2 + 250, width*2, width*2);
           }
         }
 
@@ -118,6 +122,7 @@ socket.on('newPositions', function(data){
         ctx.fillStyle = 'black';
         ctx.fillRect(249, 249, 2, 2);
         ctx.fillText(playerName, /*clientX*/ 250, /*clientY*/ 250);
+        //ctx.drawImage(toucan, 250, 250, 30, 30);
       }
     }  
 	}
@@ -138,10 +143,8 @@ socket.on('newPositions', function(data){
   for (var I = 0; I < data.length; I++) {
     var item = data[I];
     if (item.type === "timer") {
-      const block = new Image(); // Create new img element
-      block.src = ColorImage[item.target]; // Set source path
       for (var i = 0; i < 20; i++) {
-         ctx.drawImage(block, 50*i, 0, width*2, width*2);
+         ctx.drawImage(ColorImages[item.target], 50*i, 0, width*2, width*2);
       }
       //ctx.fillStyle = Colors[item.target];
       //ctx.fillRect(0, 0, 500, 50);

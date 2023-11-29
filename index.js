@@ -10,7 +10,7 @@ app.get('/',function(req, res) {
 // if the query starts with client, send file request ?
 app.use('/client',express.static(__dirname + '/client'));
 
-serv.listen(3000, '10.154.12.153');  // tell server to listen to port 3000
+serv.listen(3000,  '10.154.10.233');  // tell server to listen to port 3000
 console.log('server started.');
 
 // global lists
