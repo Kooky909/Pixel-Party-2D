@@ -1,0 +1,27 @@
+Technical:
+Make actual players/moving ------ Haley (+HTML)
+Make board generater ---- Greg
+Lobby Screen (playername/music link/ready verify) --- Valin
+Music link -> players give their music link + randomizer?
+Death logic (how we know a character is on the correct color)
+After death (spectator mode)
+
+Artistic:
+Player models
+Death animation?
+
+DONE:
+-make a waiting screen with the ready verification --- Greg
+-make multi screen framework --- Greg
+-Customize the login Screen -- Victor
+
+NEW LIST:
+-zoomed in map --- Haley
+-character icons with username above --- Haley
+-Implement music --- Valin
+
+Music we want:
+-Never gunna give you up
+-darude sandstorm
+-nyan cat
+-pixel party - vexento
