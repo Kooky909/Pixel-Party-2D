@@ -124,7 +124,7 @@ socket.on('newPositions', function(data){
         ctx.fillText(playerName, /*clientX*/ 250, /*clientY*/ 250);
         //ctx.drawImage(toucan, 250, 250, 30, 30);
       }
-    }  
+    }
 	}
 
   // Print all other players
@@ -156,6 +156,14 @@ socket.on('newPositions', function(data){
       ctx.strokeRect(0, 0, 500, 50);
       ctx.lineWidth = 1;
       heavyPrint(item.time, 240, 35);
+    } else if (item.type === "message") {
+      ctx.fillStyle = "#5F9EA0";
+      ctx.fillRect(50, 225, 400, 50);
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 10;
+      ctx.strokeRect(50, 225, 400, 50);
+      ctx.lineWidth = 1;
+      heavyPrint(item.text, 75, 262);
     }
   }
 });
@@ -168,9 +176,11 @@ socket.on('newLobby', function(data){
   ctx.clearRect(0,0,500,500);
   heavyPrint("Player List:",20,30);
   var readyCount = 0;
+  var playerCount = 0;
   for (var i in data) {
     if (data[i].type === "player") {
       var player = data[i];
+      playerCount ++;
       if(player.ready) {
         ctx.fillStyle = "green";
         readyCount++;
@@ -178,12 +188,12 @@ socket.on('newLobby', function(data){
         ctx.fillStyle = "red";
       }
       ctx.font = "20px serif";
-      ctx.fillText(player.name,30 + 100 * Math.floor(i/16), (i * 25)%400 +70)
+      ctx.fillText(player.name,30 + 100 * Math.floor((playerCount-1)/16), ((playerCount-1) * 25)%400 +70)
     } else if (data[i].type === "timer") {
       heavyPrint(data[i].timer, 450, 30);
     }
   }
-  heavyPrint(readyCount + "/" + data.length,180,30);
+  heavyPrint(readyCount + "/" + playerCount,180,30);
 });
 
 // player movements

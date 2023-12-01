@@ -10,7 +10,7 @@ app.get('/',function(req, res) {
 // if the query starts with client, send file request ?
 app.use('/client',express.static(__dirname + '/client'));
 
-serv.listen(3000,  '10.154.10.233');  // tell server to listen to port 3000
+serv.listen(3000,  '10.152.22.183');  // tell server to listen to port 3000
 console.log('server started.');
 
 // global lists
@@ -21,12 +21,16 @@ var PLAYER_LIST = {};
 var COLOR_COUNT = 12;
 var BOARD_SIZE = 20;
 
-// global objects
+// global OBJECTS and Variables
 var GAME_STATE = "lobby";
 var GAME_PHASE = "waiting"; // waiting, active, ending
 var GameBoard = [];
 var TIMER = 0;
 var TargetColor = 0;
+var RoundCount = 0;
+var PlayersAlive = 0;
+var EndingMessage = "";
+GameOverFlag = false;
 
 // constructors (objects)
 var Player = function(id, name) {
@@ -40,8 +44,7 @@ var Player = function(id, name) {
     leftArrow:false,
     upArrow:false,
     downArrow:false,
-    maxSpeed:3,
-    alive:true
+    alive:(GAME_STATE === "lobby")
   }
   return self;
 }
@@ -59,7 +62,7 @@ var Board = function() {
 // functions
 var shuffle = function(inList) {
   var outList = inList;
-  for (i in outList){
+  for (var i in outList){
     var target = Math.floor(Math.random()*outList.length);
     if (target != i) {
       var temp = outList[i];
@@ -83,6 +86,7 @@ var updatePlayers = function() {
   if (GAME_PHASE != "active") {
     return;
   }
+  var speed = 1 * (1.1**RoundCount);
   for (var i in PLAYER_LIST) {
     var player = PLAYER_LIST[i];
 
@@ -90,15 +94,26 @@ var updatePlayers = function() {
       continue;
     }
     
-    if(player.rightArrow)
-        player.x += player.maxSpeed;
-    if(player.leftArrow)
-        player.x -= player.maxSpeed;
-    if(player.upArrow)
-        player.y -= player.maxSpeed;
-    if(player.downArrow)
-        player.y += player.maxSpeed;
+    if(player.rightArrow && player.x + speed <= 495)
+        player.x += speed;
+    if(player.leftArrow && player.x - speed >= 5)
+        player.x -= speed;
+    if(player.upArrow && player.y - speed >= 5)
+        player.y -= speed;
+    if(player.downArrow && player.y + speed <= 495)
+        player.y += speed;
 
+    PLAYER_LIST[i] = player;
+  }
+}
+
+var resetPlayers = function() {
+  for(var i in PLAYER_LIST) {
+    var player = PLAYER_LIST[i];
+    player.alive = true;
+    player.ready = false;
+    player.x = 100 + Math.floor(Math.random() * 400);
+    player.y = 100 + Math.floor(Math.random() * 400);
     PLAYER_LIST[i] = player;
   }
 }
@@ -153,6 +168,8 @@ setInterval (function() {
   if (GAME_STATE === "running"){
   	var pack = []; // what is pack and why does it push
     var timeAdjust = 3;
+    var newDead = [];
+
     initialize();
     updatePlayers();
 
@@ -163,14 +180,14 @@ setInterval (function() {
         GameBoard = Board();
       }
       if (TIMER >= 3){
-        TIMER = 0;
+        TIMER = 5 - (5*(0.95**RoundCount));
         GAME_PHASE = "active";
         TargetColor = Math.floor(Math.random() * COLOR_COUNT);
       }
     } else if (GAME_PHASE === "active") {
       count();
       timeAdjust = 5;
-      if (TIMER >= 5) {
+      if (TIMER >= timeAdjust) {
         for (var i in PLAYER_LIST) {
           var player = PLAYER_LIST[i];
           if (!player.alive) {
@@ -180,26 +197,58 @@ setInterval (function() {
           var x = Math.floor(player.x/25);
           var y = Math.floor(player.y/25);
 
-          console.log("Px: " + player.x + " x: " + x);
-          console.log("Py: " + player.y + " y: " + y);
-          
           if(GameBoard[y][x] != TargetColor) {
             player.alive = false;
             PLAYER_LIST[i] = player;
-            console.log("Player " + player.name + " dead");
-            console.log("Px: " + player.x + " x: " + x);
-            console.log("Py: " + player.y + " y: " + y);
+            newDead.push(i);
           }
         }
         GAME_PHASE = "ending";
         TIMER = 0;
         TargetColor = 0;
+        RoundCount++;
+
+        if(PlayersAlive - newDead.length > 1) {
+          EndingMessage = "";
+          PlayersAlive -= newDead.length;
+        } else if (PlayersAlive - newDead.length < 1) {
+          EndingMessage = "Everyone Died, Try Again"
+          RoundCount --;
+
+          for (var i in newDead) {
+            var player = PLAYER_LIST[newDead[i]];
+            player.alive = true;
+            PLAYER_LIST[newDead[i]] = player;
+          }
+        } else {
+          for (var i in PLAYER_LIST) {
+            if(PLAYER_LIST[i].alive) {
+              EndingMessage = "Winner: " + PLAYER_LIST[i].name;
+              GameOverFlag = true;
+              break;
+            }
+          }
+        }
       }
     } else if (GAME_PHASE === "ending") {
+      if(EndingMessage != ""){
+        pack.push({
+          type:"message",
+          text:EndingMessage
+        });
+      }
+
       count();
-      if (TIMER >= 3) {
-        GAME_PHASE = "waiting";
+      timeAdjust = 5;
+      if (TIMER >= 5) {
+        EndingMessage = "";
         TIMER = 0;
+        if(GameOverFlag){
+          resetPlayers();
+          GAME_STATE = "lobby";
+        } else {
+          GAME_PHASE = "waiting";
+        }
       }
     }
     
@@ -254,7 +303,10 @@ setInterval (function() {
         }
         GAME_STATE = "running";
         GAME_PHASE = "waiting";
+        RoundCount = 0;
         TIMER = 0;
+        PlayersAlive = playerCount;
+        GameOverFlag = false;
       } else {
         count();
       }
