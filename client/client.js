@@ -16,8 +16,14 @@ for (var i = 0; i < 12; i++) {
    ColorImages[i] = temp;
 }
 
-const toucan = new Image(); // Create new img element
-toucan.src = "client/img/toucan.png"; // Set source path
+var Characters = ['toucan','snake','doodle','steve','ghost'];
+var CharacterImages = [];
+
+for (var i = 0; i < 5; i++) {
+   const temp = new Image(); // Create new img element
+   temp.src = "client/img/" + Characters[i] + ".png"; // Set source path
+   CharacterImages[i] = temp;
+}
 
 // doccument elements
 var signDiv = document.getElementById('signDiv');
@@ -107,6 +113,7 @@ socket.on('newPositions', function(data){
         var clientX = data[I].x;
         var clientY = data[I].y;
         var playerName = data[I].name;
+        var character = data[I].character;
 
         // Print the board
         for (var i = 0; i < boardSize; i++) {
@@ -119,10 +126,11 @@ socket.on('newPositions', function(data){
         }
 
         // Print the client
+        ctx.drawImage(CharacterImages[character], 225, 225, 50, 50);
+        ctx.font = "15px Georgia";
         ctx.fillStyle = 'black';
         ctx.fillRect(249, 249, 2, 2);
-        ctx.fillText(playerName, /*clientX*/ 250, /*clientY*/ 250);
-        //ctx.drawImage(toucan, 250, 250, 30, 30);
+        ctx.fillText(playerName, /*clientX*/ 220, /*clientY*/ 290);
       }
     }
 	}
@@ -134,9 +142,11 @@ socket.on('newPositions', function(data){
       if (data[I].name != clientName) {
         var playerX = 2*data[I].x - 2*clientX + 250/*width/2*/;
         var playerY = 2*data[I].y - 2*clientY + 250/*width/2*/;
-        //var playerName = data[I].name;
+        var playerChar = data[I].character;
+        ctx.drawImage(CharacterImages[playerChar], playerX - 25, playerY - 25, 50, 50);
+        ctx.font = "15px Georgia";
         ctx.fillStyle = 'black';
-        ctx.fillText(data[I].name, playerX, playerY);
+        ctx.fillText(data[I].name, playerX - 30, playerY + 40);
       }
     } 
   }

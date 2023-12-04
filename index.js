@@ -10,7 +10,7 @@ app.get('/',function(req, res) {
 // if the query starts with client, send file request ?
 app.use('/client',express.static(__dirname + '/client'));
 
-serv.listen(3000,  '10.152.22.183');  // tell server to listen to port 3000
+serv.listen(3000);  // tell server to listen to port 3000
 console.log('server started.');
 
 // global lists
@@ -39,6 +39,7 @@ var Player = function(id, name) {
     y:100 + Math.floor(Math.random() * 400),
     id:id,
     name:name,
+    character:3,
     ready:false,
     rightArrow:false,   // Pressing arrow keys
     leftArrow:false,
@@ -269,6 +270,7 @@ setInterval (function() {
   			type:"player",
         x:player.x,
   			y:player.y,
+         character:player.character,
   			name:player.name,
         alive:player.alive
   		});
