@@ -5,7 +5,10 @@
     <button id = "signDiv-signIn" class="bb">Start</button>
     <audio src = "client/music/Never gonna give you up.mp3" id = "Audio"> </audio>
   <audio src = "client/music/Sandstorm.mp3" id = "Audio1"> </audio>
-    <button class="bb" onClick = "MyAudio()" > Play Song </button>
+  <audio src = "client/music/Nyan Cat.mp3" id = "Audio2"> </audio>
+  <audio src = "client/music/Vexento - Pixel Party.mp3" id = "Audio3">
+  <audio src = "client/music/countdown.mp3" id = "Countdown">  </audio>
+    <button class="bb" onClick = "PlayAudio()" > Play Song </button>
   <button class = "bb" onclick = "PauseAudio()" type = "button" > Pause Song </button>
   <button class = "bb" onclick = "prevSong()" type = "button" > Prev Song </button>
   <button class = "bb" onclick = "nextSong()" type = "button" > Next Song </button>
@@ -13,9 +16,19 @@
 
   </div>
   
-  <div id = "lobbyDiv" class = "main_contain">
-    <h1>Player Name </h1>
-    <button class = "bb" onclick = "prevSong()" type = "button" > Prev Song </button>
+  <div id = "lobbyDiv" class = "display:none;">
+    <h1> Music Selection </h1>
+    <button class = "bb" onclick = "MyAudio()" type = "button" > Random Song 1 </button>
+    <button class = "bb" onclick = "MyAudio2()" type = "button" > Random Song 2 </button>
+    <button class = "bb" onclick = "MyAudio3()" type = "button" > Random Song 3 </button>
+    <button class = "bb" onclick = "MyAudio4()" type = "button" > Random Song 4 </button>
+
+
+    <button class = "bb" onclick = "CharChoice1()" type = "button" > Toucan </button>
+    <button class = "bb" onclick = "CharChoice2()" type = "button" > Snake </button>
+    <button class = "bb" onclick = "CharChoice3()" type = "button" > Doodle Jump Guy </button>
+    <button class = "bb" onclick = "CharChoice4()" type = "button" > Steve </button>
+
     
   </div>
   <div id = "gameDiv" style = "display:none;">
