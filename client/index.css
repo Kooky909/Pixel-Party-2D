@@ -39,6 +39,19 @@ button.bb {
     margin-bottom: 10px;
 }
 
+button.bd {
+    padding: 10px;
+    font-size: 18px;
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 300px; /* Set the width to 100px to match the text input */
+    top: 0;
+    right: 0;
+    position = absolute;
+}
 
 button.bb:hover {
     background-color: #2980b9;
