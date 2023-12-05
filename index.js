@@ -39,7 +39,7 @@ var Player = function(id, name) {
     y:100 + Math.floor(Math.random() * 400),
     id:id,
     name:name,
-    character:3,
+    character:1,
     ready:false,
     rightArrow:false,   // Pressing arrow keys
     leftArrow:false,
@@ -161,6 +161,14 @@ io.sockets.on('connection', function(socket) {
     PLAYER_LIST[socket.id] = player;
   });
   
+
+  socket.on('CharChoice', function(data) {
+    var player = PLAYER_LIST[socket.id];
+    player.character = data.imageNum;
+    PLAYER_LIST[socket.id] = player;
+  });
+  
+  
 });
 
 
@@ -175,6 +183,14 @@ setInterval (function() {
     updatePlayers();
 
     if (GAME_PHASE === "waiting") {
+       
+      // loop through the client sockets
+      for(var i in SOCKET_LIST) {
+        var socket = SOCKET_LIST[i];
+        socket.emit('PausingAudio');  // ***************
+        socket.emit('CountdownAudio');
+      } 
+       
       var old_time = TIMER;
       count();
       if (Math.ceil(TIMER) > Math.ceil(old_time)) {
@@ -186,6 +202,13 @@ setInterval (function() {
         TargetColor = Math.floor(Math.random() * COLOR_COUNT);
       }
     } else if (GAME_PHASE === "active") {
+       
+      // loop through the client sockets
+      for(var i in SOCKET_LIST) {
+        var socket = SOCKET_LIST[i];
+        socket.emit('PlayingAudio');   // *******************
+      }
+ 
       count();
       timeAdjust = 5;
       if (TIMER >= timeAdjust) {
@@ -200,6 +223,7 @@ setInterval (function() {
 
           if(GameBoard[y][x] != TargetColor) {
             player.alive = false;
+            player.character = 4;
             PLAYER_LIST[i] = player;
             newDead.push(i);
           }
@@ -232,6 +256,11 @@ setInterval (function() {
         }
       }
     } else if (GAME_PHASE === "ending") {
+      // loop through the client sockets
+      for(var i in SOCKET_LIST) {
+        var socket = SOCKET_LIST[i];
+        socket.emit('PausingAudio');  // ***************
+      } 
       if(EndingMessage != ""){
         pack.push({
           type:"message",
