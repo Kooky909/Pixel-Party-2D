@@ -18,6 +18,7 @@ for (var i = 0; i < 12; i++) {
 
 var Characters = ['toucan','snake','doodle','steve','ghost'];
 var CharacterImages = [];
+var CharChoice;
 
 for (var i = 0; i < 5; i++) {
    const temp = new Image(); // Create new img element
@@ -25,33 +26,90 @@ for (var i = 0; i < 5; i++) {
    CharacterImages[i] = temp;
 }
 
-// doccument elements
+// document elements
 var signDiv = document.getElementById('signDiv');
 var gameDiv = document.getElementById('gameDiv');
 var signDivUsername = document.getElementById('nameBox');
 var signDivSignIn = document.getElementById('signDiv-signIn');
 
+////////////////////////////
+//
+//     MUSIC STUFF
+//
+////////////////////////////
+
 const audio = document.getElementById('Audio');
 const songs = ['Never gonna give you up', 'Nyan Cat', 'Sandstorm', 'Vexento - Pixel Party'];
 
-// Keep track of song
-let songIndex = 0;
 
-// Initially load song details into DOM
-loadSong(songs[songIndex]);
+let songIndex = 0;        // Keep track of song
+loadSong(songs[songIndex]);         // Initially load song details into DOM
 
 // Update song details
 function loadSong(song) {
   audio.src = `client/music/${song}.mp3`;
 }
-// Play Audio
-var MyAudio = function() {
-  document.getElementById("Audio").play();
+
+// Plays the audio
+var PlayAudio = function() {
+  //if (songIndex = 1) {
+  document.getElementById(songIndex).play();
+  //}
 }
+
+// Buttons to choose songs
+var MyAudio = function() {
+  //document.getElementById("Audio").play();
+  document.getElementById('lobbyDiv').style.visibility = 'hidden';
+  songIndex = "Audio";
+}
+
+var MyAudio2 = function() {
+  //document.getElementById("Audio1").play();
+  document.getElementById('lobbyDiv').style.visibility = 'hidden';
+  songIndex = "Audio1";
+}
+
+var MyAudio3 = function() {
+  //document.getElementById("Audio2").play();
+  document.getElementById('lobbyDiv').style.visibility = 'hidden';
+  songIndex = "Audio2";
+}
+
+var MyAudio4 = function() {
+  //document.getElementById("Audio3").play();
+  document.getElementById('lobbyDiv').style.visibility = 'hidden';
+  songIndex = "Audio3";
+}
+
+
+// Character Select Function
+var CharChoice1 = function() {
+  socket.emit('CharChoice', {imageNum:0});
+}
+
+var CharChoice2 = function() {
+   socket.emit('CharChoice', {imageNum:1});
+}
+
+var CharChoice3 = function() {
+  socket.emit('CharChoice', {imageNum:2});
+}
+
+var CharChoice4 = function() {
+  socket.emit('CharChoice', {imageNum:3});
+}
+
 // Pause Audio
 var PauseAudio = function() {
-  document.getElementById("Audio").pause();
+  document.getElementById(songIndex).pause();
 }
+
+// Play Countdown
+var PlayCountdown = function() {
+  document.getElementById("Countdown").play();
+}
+
 // Prev song
 var prevSong = function() {
   songIndex--;
@@ -59,11 +117,10 @@ var prevSong = function() {
   if (songIndex < 0) {
     songIndex = songs.length - 1;
   }
-
   loadSong(songs[songIndex]);
-
-  MyAudio();
+  PlayAudio();
 }
+
 // Next Song
 var nextSong = function() {
   songIndex++;
@@ -71,10 +128,8 @@ var nextSong = function() {
   if (songIndex > songs.length - 1) {
     songIndex = 0;
   }
-
   loadSong(songs[songIndex]);
-
-  MyAudio();
+  PlayAudio();
 }
 
 signDivSignIn.onclick = function() {
@@ -93,9 +148,20 @@ socket.on('signInResponse', function(data) {
       alert("sign in unsuccessful");
 });
 
+
+socket.on('PlayingAudio', function() {   // *****************
+  PlayAudio();
+});
+
+socket.on('PausingAudio', function() {     // ****************
+  PauseAudio();   
+});
+
+socket.on('CountdownAudio', function() {     // ****************
+  PlayCountdown();   
+});
+
 socket.on('newPositions', function(data){
-   lobbyDiv.style.display = 'none';
-   //gameDiv.style.display = 'inline-block';
 	ctx.clearRect(0,0,500,500);
    ctx.fillStyle = 'black';
    ctx.fillRect(0,0,500,500);
@@ -156,8 +222,6 @@ socket.on('newPositions', function(data){
       for (var i = 0; i < 20; i++) {
          ctx.drawImage(ColorImages[item.target], 50*i, 0, width*2, width*2);
       }
-      //ctx.fillStyle = Colors[item.target];
-      //ctx.fillRect(0, 0, 500, 50);
       ctx.fillStyle = "#5F9EA0";
       ctx.fillRect(225, 0, 50, 50);
       ctx.strokeStyle = "black";
@@ -179,9 +243,9 @@ socket.on('newPositions', function(data){
 });
 
 socket.on('newLobby', function(data){
-   lobbyDiv.style.display = 'inline-block';
    gameDiv.style.display = 'inline-block';
-
+   lobbyDiv.style.display = 'inline-block';
+   
 
   ctx.clearRect(0,0,500,500);
   heavyPrint("Player List:",20,30);
