@@ -133,9 +133,13 @@ io.sockets.on('connection', function(socket) {
   // data is the extra data from the client emit call
   socket.on('signIn',function(data) {
     console.log("Sign in recieved");
-    var player = Player(socket.id, data.username);
-    PLAYER_LIST[socket.id] = player;
-    socket.emit('signInResponse', {success:true});   
+    if (data.username.length <= 8) {
+      var player = Player(socket.id, data.username);
+      PLAYER_LIST[socket.id] = player;
+      socket.emit('signInResponse', {success:true});
+    } else {
+       socket.emit('signInResponse', {success:false});
+    }
   });
   
   //console.log("New connection: " + socket.number);

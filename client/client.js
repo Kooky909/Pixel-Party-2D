@@ -59,29 +59,20 @@ var PlayAudio = function() {
 
 // Buttons to choose songs
 var MyAudio = function() {
-  //document.getElementById("Audio").play();
-  document.getElementById('lobbyDiv').style.visibility = 'hidden';
   songIndex = "Audio";
 }
 
 var MyAudio2 = function() {
-  //document.getElementById("Audio1").play();
-  document.getElementById('lobbyDiv').style.visibility = 'hidden';
   songIndex = "Audio1";
 }
 
 var MyAudio3 = function() {
-  //document.getElementById("Audio2").play();
-  document.getElementById('lobbyDiv').style.visibility = 'hidden';
   songIndex = "Audio2";
 }
 
 var MyAudio4 = function() {
-  //document.getElementById("Audio3").play();
-  document.getElementById('lobbyDiv').style.visibility = 'hidden';
   songIndex = "Audio3";
 }
-
 
 // Character Select Function
 var CharChoice1 = function() {
@@ -111,6 +102,7 @@ var PlayCountdown = function() {
 }
 
 // Prev song
+/*
 var prevSong = function() {
   songIndex--;
 
@@ -131,6 +123,7 @@ var nextSong = function() {
   loadSong(songs[songIndex]);
   PlayAudio();
 }
+*/
 
 signDivSignIn.onclick = function() {
   // console.log(signDivUsername.value);
@@ -145,7 +138,7 @@ socket.on('signInResponse', function(data) {
     gameDiv.style.display = 'inline-block';
     connected = true;
   } else
-      alert("sign in unsuccessful");
+      alert("sign in unsuccessful, username must be under 8 characters");
 });
 
 

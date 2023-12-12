@@ -18,6 +18,13 @@ h1 {
     color: #333;
 }
 
+h2 {
+    font-size: 43px;
+    color: #333;
+    margin-left: 60px;
+    margin-right: 145px;
+}
+
 input[type="text"] {
     padding: 10px;
     font-size: 16px;
@@ -36,7 +43,25 @@ button.bb {
     border-radius: 5px;
     cursor: pointer;
     width: 300px; /* Set the width to 100px to match the text input */
-    margin-bottom: 10px;
+    margin-left: 85px;
+    margin-right: 85px;
+    margin-bottom: 20px;
+    display: block;
+}
+
+button.bc {
+    padding: 10px;
+    font-size: 18px;
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 300px; /* Set the width to 100px to match the text input */
+    margin-left: 85px;
+    margin-right: 85px;
+    margin-bottom: 20px;
+    display: block;
 }
 
 button.bd {
@@ -56,4 +81,25 @@ button.bd {
 button.bb:hover {
     background-color: #2980b9;
     transform: scale(1.2);
+}
+
+button.bb:active {
+    background-color: #00ff00;
+}
+
+button.bb:focus {
+    background-color: #00ff00;
+}
+
+button.bc:hover {
+    background-color: #2980b9;
+    transform: scale(1.2);
+}
+
+button.bc:active {
+    background-color: #00ff00;
+}
+
+button.bc:focus {
+    background-color: #00ff00;
 }
