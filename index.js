@@ -77,10 +77,33 @@ var shuffle = function(inList) {
   }
   return out2dList;
 }
+
 var initialize = function() {
   if (GameBoard.length == 0) {
     GameBoard = Board();
   }
+}
+
+var checkSuccess = function(player) {
+  // ignore already dead players
+  if (!player.alive) {
+    return true;
+  }
+
+  // determine player tile
+  var x = Math.floor(player.x/25);
+  var y = Math.floor(player.y/25);
+
+  // if player on wrong color tile
+  return GameBoard[y][x] == TargetColor;
+} 
+
+var startGame = function() {
+  GAME_STATE = "running";
+  GAME_PHASE = "waiting";
+  RoundCount = 0;
+  PlayersAlive = playerCount;
+  GameOverFlag = false;
 }
 
 var updatePlayers = function() {
@@ -179,8 +202,11 @@ io.sockets.on('connection', function(socket) {
 // loop! -- is the clock
 setInterval (function() {
   if (GAME_STATE === "running"){
-  	var pack = []; // what is pack and why does it push
-    var timeAdjust = 3;
+  	var pack = []; // data to be sent to clients
+    var timeAdjust = 3; // how long the current phase timer is
+
+    // store players that die this round
+    // failsafe if everyone dies, they can be brought back
     var newDead = [];
 
     initialize();
@@ -197,9 +223,14 @@ setInterval (function() {
        
       var old_time = TIMER;
       count();
+
+      // if a full second has passed, shuffle the board
       if (Math.ceil(TIMER) > Math.ceil(old_time)) {
         GameBoard = Board();
       }
+
+      // waiting phase done
+      // timer initialized for active phase
       if (TIMER >= 3){
         TIMER = 5 - (5*(0.95**RoundCount));
         GAME_PHASE = "active";
@@ -215,41 +246,46 @@ setInterval (function() {
  
       count();
       timeAdjust = 5;
+
+      // if active phase over
       if (TIMER >= timeAdjust) {
+        // check each player
         for (var i in PLAYER_LIST) {
           var player = PLAYER_LIST[i];
-          if (!player.alive) {
-            continue;
-          }
 
-          var x = Math.floor(player.x/25);
-          var y = Math.floor(player.y/25);
-
-          if(GameBoard[y][x] != TargetColor) {
+          // if player on wrong color tile
+          if(!checkSuccess(player)) {
             player.alive = false;
-            player.character = 4;
+            player.character = 4; // ghost
             PLAYER_LIST[i] = player;
             newDead.push(i);
           }
         }
+
+        // active phase over
         GAME_PHASE = "ending";
         TIMER = 0;
         TargetColor = 0;
         RoundCount++;
 
+        // check if game is over
         if(PlayersAlive - newDead.length > 1) {
+          // multiple players alive
           EndingMessage = "";
           PlayersAlive -= newDead.length;
         } else if (PlayersAlive - newDead.length < 1) {
+          // everyone died
           EndingMessage = "Everyone Died, Try Again"
           RoundCount --;
 
+          // revive players who died this round
           for (var i in newDead) {
             var player = PLAYER_LIST[newDead[i]];
             player.alive = true;
             PLAYER_LIST[newDead[i]] = player;
           }
         } else {
+          // someone won
           for (var i in PLAYER_LIST) {
             if(PLAYER_LIST[i].alive) {
               EndingMessage = "Winner: " + PLAYER_LIST[i].name;
@@ -258,13 +294,17 @@ setInterval (function() {
             }
           }
         }
+        
       }
+    // end active phase
     } else if (GAME_PHASE === "ending") {
       // loop through the client sockets
       for(var i in SOCKET_LIST) {
         var socket = SOCKET_LIST[i];
         socket.emit('PausingAudio');  // ***************
       } 
+
+      // send ending message if there is one
       if(EndingMessage != ""){
         pack.push({
           type:"message",
@@ -274,18 +314,23 @@ setInterval (function() {
 
       count();
       timeAdjust = 5;
+
+      // ending phase over
       if (TIMER >= 5) {
         EndingMessage = "";
         TIMER = 0;
         if(GameOverFlag){
+          // if game over, return to lobby
           resetPlayers();
           GAME_STATE = "lobby";
         } else {
+          // next round
           GAME_PHASE = "waiting";
         }
       }
     }
     
+    // send board and timer
     pack.push({
       type:"board",
       board:GameBoard
@@ -294,36 +339,41 @@ setInterval (function() {
       type:"timer",
       time:Math.ceil(timeAdjust - TIMER),
       target:TargetColor
-    })
-    // loop through the signed in players and update positions
+    });
+
+    // send player data
   	for(var i in PLAYER_LIST) {
   		var player = PLAYER_LIST[i];
-      //player.updatePosition();
   		pack.push({
   			type:"player",
         x:player.x,
   			y:player.y,
-         character:player.character,
+        character:player.character,
   			name:player.name,
         alive:player.alive
   		});
   	}
+
     // loop through the client sockets
   	for(var i in SOCKET_LIST) {
-  		var socket = SOCKET_LIST[i];
-  
+  		// send packets
+      var socket = SOCKET_LIST[i];
   		socket.emit('newPositions', pack);  // client.js picks up call
   	}
+  // end running
   } else if (GAME_STATE === "lobby") {
     var pack = [];
     var readyCount = 0;
     var playerCount = 0;
+
+    // count ready players
     for (var i in PLAYER_LIST) {
       playerCount++;
       var player = PLAYER_LIST[i]
       if(player.ready) {
         readyCount++;
       }
+      // send player data
       pack.push({
         type:"player",
         name:player.name,
@@ -331,17 +381,16 @@ setInterval (function() {
       });
     }
 
+    // if all players ready and at least 2 are connected
     if (readyCount == playerCount && playerCount >= 2) {
+      // waits 5 seconds
       if (TIMER >= 5) {
+        // initialize game variables
         for (var i in PLAYER_LIST) {
           PLAYER_LIST[i].alive = true;
         }
-        GAME_STATE = "running";
-        GAME_PHASE = "waiting";
-        RoundCount = 0;
+        startGame();
         TIMER = 0;
-        PlayersAlive = playerCount;
-        GameOverFlag = false;
       } else {
         count();
       }
@@ -350,15 +399,15 @@ setInterval (function() {
         timer:Math.ceil(5 - TIMER)
       });
     } else {
+      // reset timer if someone unreadies
       TIMER = 0;
     }
     
     // loop through the client sockets
     for(var i in SOCKET_LIST) {
+      // send packet
       var socket = SOCKET_LIST[i];
-
       socket.emit('newLobby', pack);  // client.js picks up call
     }
-
-  }
+  } // end lobby
 }, 1000/40);
